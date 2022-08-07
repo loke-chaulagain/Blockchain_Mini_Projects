@@ -1,3 +1,25 @@
+
+Requirements
+1.Metamask
+2.Alchemy -->in order to interact with the blockchain
+3.hardhat
+4.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 npm init -y
 
 npm i ethers  ----->To interact with etherium blockchain . The ethers.js library aims to be a complete and compact library for interacting with the Ethereum Blockchain and its ecosystem.
@@ -12,6 +34,7 @@ npm i @nomiclabs/hardhat-waffle
 npm i @nomiclabs/hardhat-ethers
 npm i dotenv
 npm i @openzeppelin/contracts
+npm install --save-dev @nomicfoundation/hardhat-toolbox
 
 npx hardhat    //initialize hardhat and create basic sample project
 

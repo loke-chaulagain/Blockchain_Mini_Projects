@@ -39,4 +39,23 @@ contract Library {
         bookToOwner[bookId] = msg.sender;
         emit AddBook(msg.sender, bookId);
     }
+
+    //Get finished books
+
+    functon _getBookList(bool finished) private view returns (Book[] memory){
+        Book[] memory temporary =new Book[](bookList.length);
+        uint count=0;
+        for(uint i=o;<bookList.length;i++){
+            if (booktoOwner[i]==msg.sender){
+                temporary[counter]=bookList[i];
+                counter ++;
+            }
+        }
+    }
+
+
+    function getFinishedBooks() external view returns (Book[] memory){
+
+        return _getBooksLsts(true);
+    }
 }

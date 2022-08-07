@@ -5,7 +5,9 @@
 //In our tests we're going to use ethers.js to interact with the Ethereum contract &   we'll use Mocha as our test runner.
 
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
+// const { ethers } = require("hardhat");
+
+const {ethers}=require("hardhat/config");
 
 //describe is the group &  Twitter Contract is the test name
 //This is our main test method where all others test methods lies here
@@ -70,8 +72,42 @@ describe("Twitter Contract", function () {
         isDeleted: false,
       };
 
-      await expect(await twitter.addTweet(tweet.tweetText, tweet.isDeleted).to.emit(twitter, "AddTweet").withArgs(owner.address,NUM_TOTAL_NOT_MY_TWEETS+NUM_TOTAL_MY_TWEETS
-        ));	
+      expect(
+        await twitter
+          .addTweet(tweet.tweetText, tweet.isDeleted)
+          .to.emit(twitter, "AddTweet")
+          .withArgs(
+            owner.address,
+            NUM_TOTAL_NOT_MY_TWEETS + NUM_TOTAL_MY_TWEETS
+          )
+      );
+    });
+  });
+
+  //Test 2 : Get all tweets
+  describe("Get All Tweets", function () {
+    it("Should return the correct number of total tweets", async function () {
+      const tweetsFromChain = await twitter.getAll();
+      expect(tweetsFromChain.length).to.equal(
+        NUM_TOTAL_NOT_MY_TWEETS + NUM_TOTAL_MY_TWEETS
+      );
+    });
+    //Test 3 : checking no of MY tweets(3)
+    it("should return the correct number of my all tweets", async function () {
+      const myTweetsFromChain = await twitter.getMyTweets();
+      expect(myTweetsFromChain.length).to.equal(NUM_TOTAL_MY_TWEETS);
+    });
+  });
+
+  //Test 4 : Deleting my tweets
+  describe("Delete Tweets ", function () {
+    it("should emit delete tweets event ", async function () {
+      const TWEET_ID = 0;
+      const TWEET_DELETED = true;
+      //addr1 added 3 tweets so only addr1 can delete that tweets
+      await expect(twitter.connect(addr1).deleteTweet(TWEET_ID, TWEET_DELETED))
+        .to.emit(twitter, "DeleteTweet")
+        .withArgs(TWEET_ID, TWEET_DELETED);
     });
   });
 });
