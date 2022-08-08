@@ -32,7 +32,7 @@ contract Blog {
     // events facilitate communication between smart contracts and their user interfaces.
     //i.e. we can create listeners for events in the client and also use them in The Graph.
     event PostCreated(uint256 id, string title, string hash);
-    event postUpdated(uint256 id, string title, string hash, bool published);
+    event PostUpdated(uint256 id, string title, string hash, bool published);
 
     //Constructor
     //when the blog is deployed ,give it a name also set the crator as the owner of the contract.
@@ -53,9 +53,63 @@ contract Blog {
         owner = newOwner;
     }
 
-    //onlyOwner modifier
+    //Fetch an individual post function by content hash //it will return a single post based on a hash that it is deployed to.
+    function fetchPost(string memory hash) public view returns (Post memory) {
+        return hashToPost[hash];
+    }
+
+    //Creating a new post function //onlyOwner is the modifer that gives permission to onlt yhe owner
+    //while creatinfg a post it takes two parameter title and hash
+    function createPost(string memory title, string memory hash)
+        public
+        onlyOwner
+    {
+        _postIds.increment(); //incrementing the post id as we create a new post //the first post have post id of 1.
+        uint256 postId = _postIds.current();
+        Post storage post = idToPost[postId];
+        post.id = postId;
+        post.title = title;
+        post.published = true;
+        post.content = hash;
+        hashToPost[hash] = post; //hash to post mapping
+        emit PostCreated(postId, title, hash); //everytime a new post will be created this event will be fired.
+    }
+
+    //Update an existing post function
+    function updatePost(
+        uint256 postId,
+        string memory title,
+        string memory hash,
+        bool published
+    ) public onlyOwner {
+        Post storage post = idToPost[postId]; //lookup post using postId
+        post.title = title;
+        post.published = published;
+        post.content = hash;
+        idToPost[postId] = post; //updating idToPost mapping
+        hashToPost[hash] = post; //updating hashToPost mapping
+        emit PostUpdated(post.id, title, hash, published);
+    }
+
+    //Fetch all Posts function
+    function fetchPost() public view returns (Post[] memory) {
+        uint256 itemCount = _postIds.current(); //finding the size of an array because that is the number of post created
+        
+        Post[] memory posts = new Post[](itemCount); //creating new Post array and returning that
+        for (uint256 i = 0; i < itemCount; i++) {
+            uint256 currentId = i + 1;
+            Post storage currentItem = idToPost[currentId];
+            posts[i] = currentItem;
+        }
+        return posts;
+    }
+
+    //This modifier means only teh contract owner can invoke the function
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
     }
 }
+
+//This contract allows the owner to create and edit posts, and for anyone to fetch posts.
+//To make this smart contract permissionless, you could remove the onlyOwner modifier and use The Graph to index and query posts by owner.
